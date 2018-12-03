@@ -10,8 +10,8 @@ def is_correct(a, b):
         return a[:diff_index] + a[diff_index + 1:]
 
 ids = list(map(str.rstrip, stdin.readlines()))
-for a in ids:
-    for b in ids:
+for i, a in enumerate(ids):
+    for b in ids[i:]:
         if is_correct(a, b):
             print(is_correct(a, b))
             exit()
