@@ -19,7 +19,7 @@ regex = re.compile(r"#(\d*) @ (\d*),(\d*): (\d*)x(\d*)")
 fabric = [[0] * 1000 for x in range(1000)]
 
 for line in stdin.readlines():
-    id, x_margin, y_margin, w, h = map(int, re.match(regex, line).groups())
+    id, x_margin, y_margin, w, h = map(int, regex.match(line).groups())
     mark_fabric(x_margin, y_margin, w, h)
 
 print(overlaps())
