@@ -1,47 +1,55 @@
 from sys import stdin
-import datetime
 import re
 
-"""
-for line in stdin.readlines():
-    groups = regex.match(line).groups()
-    y, m, d, h, s = map(int, groups[:5])
-    timestamp = datetime.datetime(y, m, d, h, s)
-    msg = groups[5]
-    msg_match = guard_regex.match(msg)
-    if (msg_match.group(2)):
-        current_guard = msg_match.group(2)
-"""
+TIME_REGEX = re.compile(r"\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] (.*)")
+GUARD_REGEX = re.compile(r"#(\d*)")
 
-regex = re.compile(r"\[(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\] (.*)")
-guard_regex = re.compile(r"#(\d*)")
+def generate_minutes_asleep():
+    minutes_asleep = {}
+    current_guard = 0
+    snoozy_time = None
 
-current_guard = 0
-time_asleep = {}
-snoozy_time = None
-asleep = False
-
-for line in sorted(stdin.readlines()):
-    groups = regex.match(line).groups()
-    y, m, d, h, s = map(int, groups[:5])
-    timestamp = datetime.datetime(y, m, d, h, s)
-    msg = groups[5]
-    if msg[0] == 'f': # falls asleep
-        asleep = True
-        snoozy_time = timestamp
-    elif msg[0] == 'w': # wakes up
-        delta = (timestamp - snoozy_time)
-        if current_guard in time_asleep:
-            time_asleep[current_guard] += delta.total_seconds()
+    for line in sorted(stdin.readlines()):
+        groups = TIME_REGEX.match(line).groups()
+        minute = int(groups[4])
+        msg = groups[5]
+    
+        if msg[0] == 'f': # falls asleep
+            snoozy_time = minute
+        elif msg[0] == 'w': # wakes up
+            if not current_guard in minutes_asleep:
+                minutes_asleep[current_guard] = [0] * 60
+            for i in range(snoozy_time, minute):
+                minutes_asleep[current_guard][i] += 1
         else:
-            time_asleep[current_guard] = delta.total_seconds()
-    else:
-        current_guard = int(guard_regex.search(msg).group(1))
+            current_guard = int(GUARD_REGEX.search(msg).group(1))
+    
+    return minutes_asleep
 
-most_sleep = 0
-snooziest_guard = 0
-for guard, time in time_asleep.items():
-    if time > most_sleep:
-        snooziest_guard = guard
+def get_sleepiest_guard(minutes_asleep):
+    most_sleep = 0
+    sleepiest_guard = 0
+    
+    for guard, minutes in minutes_asleep.items():
+        if sum(minutes) > most_sleep:
+            sleepiest_guard = guard
+            most_sleep = sum(minutes)
+    
+    return sleepiest_guard
 
-print(snooziest_guard)
+def get_sleepiest_minute(minutes_asleep, sleepiest_guard):
+    sleepiest_minute = 0
+    max_snooze = 0
+    
+    for minute in range(0, 60):
+        if minutes_asleep[sleepiest_guard][minute] > max_snooze:
+            max_snooze = minutes_asleep[sleepiest_guard][minute]
+            sleepiest_minute = minute
+    
+    return sleepiest_minute
+
+minutes_asleep = generate_minutes_asleep()
+guard = get_sleepiest_guard(minutes_asleep)
+minute = get_sleepiest_minute(minutes_asleep, guard)
+
+print(guard * minute)
