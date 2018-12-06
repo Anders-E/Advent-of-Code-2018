@@ -2,24 +2,19 @@ from sys import stdin
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 
-def react(polymer):
-    for i in range(0, len(polymer) - 1):
-        a = polymer[i]
-        b = polymer[i + 1]
-        if (a.islower() and b == a.upper() or a.isupper() and b == a.lower()):
-            polymer.pop(i)
-            polymer.pop(i)
-            return True
-    return False
+def react(polymer, c):
+    stack = []
+    for unit in polymer:
+        if stack and unit == stack[-1].swapcase():
+            stack.pop()
+        elif unit.lower() != c:
+            stack.append(unit)
+    return stack
 
 polymer = list(stdin.readline()[:-1])
 shortest = len(polymer)
 
 for c in ALPHABET:
-    filtered_polymer = [unit for unit in polymer if unit.lower() != c]
-    while (react(filtered_polymer)):
-        pass
-    if len(filtered_polymer) < shortest:
-        shortest = len(filtered_polymer)
+    shortest = min(len(react(polymer, c)), shortest)
 
 print(shortest)

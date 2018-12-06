@@ -1,18 +1,13 @@
 from sys import stdin
 
 def react(polymer):
-    for i in range(0, len(polymer) - 1):
-        a = polymer[i]
-        b = polymer[i + 1]
-        if (a.islower() and b == a.upper() or a.isupper() and b == a.lower()):
-            polymer.pop(i)
-            polymer.pop(i)
-            return True
-    return False
+    stack = []
+    for unit in polymer:
+        if stack and unit == stack[-1].swapcase():
+            stack.pop()
+        else:
+            stack.append(unit)
+    return stack
 
 polymer = list(stdin.readline()[:-1])
-
-while (react(polymer)):
-    pass
-
-print(len(polymer))
+print(len(react(polymer)))
