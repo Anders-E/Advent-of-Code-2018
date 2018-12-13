@@ -6,7 +6,7 @@ class Track:
         self.map = []
         for line in track_map:
             self.map.append(list(line.rstrip()))
-        
+
         self.carts = []
         for y, line in enumerate(self.map):
             for x, tile in enumerate(line):
@@ -17,10 +17,17 @@ class Track:
                     self.set_tile(x, y, '|')
                     self.carts.append(self.Cart(x, y, tile))
 
-    def move_carts(self):
+    def tick(self):
+        cart_positions = set()
         for cart in self.carts:
+            cart_positions.add((cart.x, cart.y))
+        for cart in sorted(self.carts):
+            cart_position = (cart.x, cart.y)
             cart.move(track)
-    
+            if (cart.x, cart.y) in cart_positions:
+                return (cart.x, cart.y)
+            cart_positions.add((cart.x, cart.y))
+
     def set_tile(self, x, y, tile):
         self.map[y][x] = tile
 
@@ -35,24 +42,21 @@ class Track:
             print(''.join(line))
 
     class Cart:
-        turn_right = {
-            '^' : '>',
-            '>' : 'v',
-            'v' : '<',
-            '<' : '^'
-        }
-        turn_left = {
-            '^' : '<',
-            '<' : 'v',
-            'v' : '>',
-            '>' : '^'
-        }
+        turn_right     = {'^' : '>', '>' : 'v', 'v' : '<', '<' : '^'}
+        turn_left      = {'^' : '<', '<' : 'v', 'v' : '>', '>' : '^'}
+        slash_turn     = {'^' : '>', '>' : '^', 'v' : '<', '<' : 'v'} # /
+        backslash_turn = {'^' : '<', '>' : 'v', 'v' : '>', '<' : '^'} # \
 
         def __init__(self, x, y, direction):
             self.x = x
             self.y = y
             self.direction = direction
             self.intersection = 0
+
+        def __lt__(self, other):
+            if self.y == other.y:
+                return self.x <= other.x
+            return self.y < other.y
         
         def move(self, track):
             tile = track.get_tile(self.x, self.y)
@@ -70,23 +74,9 @@ class Track:
 
         def turn(self, tile):
             if tile == '/':
-                if self.direction == '>':
-                    self.direction = '^'
-                elif self.direction == '<':
-                    self.direction = 'v'
-                elif self.direction == '^':
-                    self.direction = '>'
-                elif self.direction == 'v':
-                    self.direction = '<'
+                self.direction = self.slash_turn[self.direction]
             if tile == '\\':
-                if self.direction == '>':
-                    self.direction = 'v'
-                elif self.direction == '<':
-                    self.direction = '^'
-                elif self.direction == '^':
-                    self.direction = '<'
-                elif self.direction == 'v':
-                    self.direction = '>'
+                self.direction = self.backslash_turn[self.direction]
             if tile == '+':
                 if self.intersection == 0:
                     self.direction = self.turn_left[self.direction]
@@ -96,12 +86,8 @@ class Track:
 
 track = Track(stdin.readlines())
 while True:
-    #track.print_map()
-    track.move_carts()
-    cart_positions = set()
-    for cart in track.carts:
-        cart_position = (cart.x, cart.y)
-        if cart_position in cart_positions:
-            print(cart_position)
-            exit()
-        cart_positions.add(cart_position)
+    collision = track.tick()
+    if collision:
+        print(collision)
+        break
+
