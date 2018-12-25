@@ -28,11 +28,11 @@ class Map:
                 return
             if unit.is_dead():
                 continue
-            self.set_tile((unit.x, unit.y), '.')
-            del self.units[(unit.x, unit.y)]
+            self.set_tile(unit.coords(), '.')
+            del self.units[unit.coords()]
             unit.move(self)
-            self.set_tile((unit.x, unit.y), unit.tile)
-            self.units[(unit.x, unit.y)] = unit
+            self.set_tile(unit.coords(), unit.tile)
+            self.units[unit.coords()] = unit
             unit.attack(self, self.units)
         print("Round: {}".format(self.rounds + 1))
         print(self)
@@ -61,10 +61,13 @@ class Map:
             self.enemy = 'E' if tile == 'G' else 'G'
             self.hp = 200
 
+        def coords(self):
+            return (self.x, self.y)
+
         def find_path(self, m):
             visited = set()
             queue = Queue()
-            queue.put([(self.x, self.y)])
+            queue.put([self.coords()])
             while not queue.empty():
                 path = queue.get()
                 current = path[-1]
@@ -98,8 +101,8 @@ class Map:
             if target:
                 target.hp -= self.attack_power
                 if target.is_dead():
-                    del units[(target.x, target.y)]
-                    m.set_tile((target.x, target.y), '.')
+                    del units[target.coords()]
+                    m.set_tile(target.coords(), '.')
                     if target.tile == 'G':
                         m.goblins -= 1
                     if target.tile == 'E':
