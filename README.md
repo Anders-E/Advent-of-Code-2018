@@ -7,3 +7,7 @@ All code found in this repository is licensed under the GNU General Public Licen
 * Implement Day 7 pt. 2
 * Implement Day 9 pt. 2 using a doubly linked list
 * Implement Day 11 pt. 2 using [Submatrix Sum Queries](https://www.geeksforgeeks.org/submatrix-sum-queries/)
+* Implement Day 12 pt. 2 using numerical methods
+* Implement Day 14 pt. 2 (efficient comparison)
+* Debug Day 15 pt. 2
+* Solve Day 19 pt. 2 (analyze code)
